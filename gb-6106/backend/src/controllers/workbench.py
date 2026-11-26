@@ -1,11 +1,15 @@
 from redis.exceptions import RedisError
 from src.config.resources import cache, engine
-from src.services import cases, runs, reviews
+from src.services import cases, redactions, runs, reviews
 
 
 def new_case(data, user):
     with engine.begin() as db:
         return cases.create(db, data, user["username"])
+
+
+def clear_note(data, user):
+    return redactions.submit_clear(data, user["username"])
 
 
 def new_run(case_id, data, user):

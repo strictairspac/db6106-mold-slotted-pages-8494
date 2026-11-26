@@ -8,6 +8,7 @@ from src.constants.job_state import JobState
 from src.domain import scenario
 from src.models.cases import cases
 from src.models.runs import runs
+from src.services import redactions
 from src.services.audit import record
 from src.utils.serial import content_digest
 
@@ -26,6 +27,10 @@ def service_one():
         payload = db.scalar(select(cases.c.payload).where(cases.c.id == task["case_id"]))
         try:
             result = scenario.run(payload, task["parameter"], db)
+            # A clear can commit while this replay is running.  The clear also
+            # locks this run row and rescans it after commit; sanitizing here
+            # keeps the digest stable if the clear happened before this point.
+            result = redactions.sanitize_result_for_case(db, task["case_id"], result)
             output = {"status": JobState.DONE, "result": result, "digest": content_digest(result)}
         except Exception as exc:
             # Let the failed database transaction roll back before persisting the error.

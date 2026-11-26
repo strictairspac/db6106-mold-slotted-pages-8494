@@ -1,5 +1,5 @@
 /**
- * @typedef {{id:number, code:string, title:string, description:string, payload:Object, created_by:string}} Case
+ * @typedef {{id:number, code:string, title:string, description:string, payload:Object, created_by:string, redaction_status?:string|null}} Case
  * @typedef {{id:number, case_id:number, case_title:string, status:string, parameter:number, result:Object|null}} Run
  * @typedef {{run_id:number, actor:string, note:string, created_at:number}} Review
  */

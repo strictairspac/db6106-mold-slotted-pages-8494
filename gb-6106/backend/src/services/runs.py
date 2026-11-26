@@ -6,6 +6,7 @@ from sqlalchemy import insert, select
 from src.constants.job_state import JobState
 from src.domain.scenario import CONFIG
 from src.models.cases import cases
+from src.models.redactions import note_redactions
 from src.models.runs import runs
 from . import audit, cases as case_service
 
@@ -22,7 +23,15 @@ def get(db, run_id):
 
 
 def list_entries(db):
-    return [dict(row) for row in db.execute(query().order_by(runs.c.id.desc()).limit(100)).mappings()]
+    entries = [dict(row) for row in db.execute(query().order_by(runs.c.id.desc()).limit(100)).mappings()]
+    pending_cases = set(db.execute(
+        select(note_redactions.c.case_id).where(note_redactions.c.status == "pending")
+    ).scalars())
+    for entry in entries:
+        if entry["case_id"] in pending_cases:
+            # The durable clear has not finished; do not expose a stale result.
+            entry["result"] = None
+    return entries
 
 
 def enqueue(db, case_id, parameter, actor):

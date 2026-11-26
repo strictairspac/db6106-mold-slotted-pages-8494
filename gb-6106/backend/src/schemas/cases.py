@@ -27,3 +27,4 @@ class CaseEntry(CaseInput):
     id: int
     code: str
     created_by: str
+    redaction_status: str | None = None

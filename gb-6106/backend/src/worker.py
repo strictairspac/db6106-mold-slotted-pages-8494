@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.config.resources import cache, engine
 from src.services.execution import JobFailure, fail, service_one
+from src.services.redactions import recover_pending_safe
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("worker")
@@ -23,6 +24,7 @@ def work():
     while True:
         try:
             cache.set("workbench:heartbeat", time.time(), ex=90)
+            recover_pending_safe()
             try:
                 if service_one():
                     continue

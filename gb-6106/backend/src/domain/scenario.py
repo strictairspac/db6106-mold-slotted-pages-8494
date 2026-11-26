@@ -2,6 +2,7 @@ import re
 
 from .fixtures import FIXTURES
 from .page import HEADER_BYTES, SlottedPage
+from .redaction import clear_operations, clear_text
 
 
 CONFIG = {
@@ -21,6 +22,10 @@ CONFIG = {
 }
 
 ACTIONS = {"insert": "录入", "delete": "撤销", "update": "补记", "compact": "整理"}
+
+# Length-preserving whole-remark clearing entry points used by the change page.
+redact_note_text = clear_text
+redact_operations = clear_operations
 
 
 def validate(payload):
